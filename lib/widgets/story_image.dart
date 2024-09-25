@@ -3,7 +3,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:palette_generator/palette_generator.dart';
 
 import '../utils.dart';
 import '../controller/story_controller.dart';
@@ -112,9 +111,6 @@ class StoryImage extends StatefulWidget {
 }
 
 class StoryImageState extends State<StoryImage> {
-  late Rect region;
-  PaletteGenerator? paletteGenerator;
-
   ui.Image? currentFrame;
 
   Timer? _timer;
@@ -125,7 +121,7 @@ class StoryImageState extends State<StoryImage> {
   void initState() {
     super.initState();
     widget.controller!.onChangeType(TypeStory.image);
-    region = Offset.zero & Size(400, 250);
+
     if (widget.controller != null) {
       this._streamSubscription =
           widget.controller!.playbackNotifier.listen((playbackState) {
@@ -133,7 +129,6 @@ class StoryImageState extends State<StoryImage> {
         if (widget.imageLoader.frames == null) {
           return;
         }
-     
 
         if (playbackState == PlaybackState.pause) {
           this._timer?.cancel();
@@ -185,23 +180,11 @@ class StoryImageState extends State<StoryImage> {
     final nextFrame = await widget.imageLoader.frames!.getNextFrame();
 
     this.currentFrame = nextFrame.image;
-    _updatePaletteGenerator(region);
+
     if (nextFrame.duration > Duration(milliseconds: 0)) {
       this._timer = Timer(nextFrame.duration, forward);
     }
 
-    setState(() {});
-  }
-
-  Future<void> _updatePaletteGenerator(Rect newRegion) async {
-    paletteGenerator = await PaletteGenerator.fromImage(
-      RawImage(
-        image: this.currentFrame,
-        fit: widget.fit,
-      ).image!,
-      region: newRegion,
-      maximumColorCount: 20,
-    );
     setState(() {});
   }
 
@@ -240,14 +223,7 @@ class StoryImageState extends State<StoryImage> {
       width: double.infinity,
       height: double.infinity,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomCenter,
-          colors: [
-            paletteGenerator?.lightVibrantColor?.color ?? Colors.black,
-            paletteGenerator?.lightMutedColor?.color ?? Colors.black,
-          ],
-        ),
+        color: Colors.black,
       ),
       child: getContentView(),
     );
