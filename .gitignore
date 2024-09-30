@@ -72,3 +72,6 @@ build/
 # mine
 main.dart
 example/sample
+
+# FVM Version Cache
+.fvm/
